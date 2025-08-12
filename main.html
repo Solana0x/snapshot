@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NFT Snapshots • Ronin</title>
+  <!-- Primary Meta Tags -->
+  <meta name="title" content="NFT Snapshots • Ronin" />
+  <meta name="description" content="Web tool to take and export NFT holder snapshots for ERC-721 collections on the Ronin blockchain. Supports Explorer API, RPC Single, and RPC Multicall." />
+  <meta name="keywords" content="Ronin, NFT, ERC721, snapshot, holders, multicall, explorer API, Web3, crypto" />
+  <meta name="author" content="Phantom Dev" />
+  <meta name="robots" content="index,follow" />
+  <meta name="theme-color" content="#3B82F6" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://roninchain.com/" />
+  <meta property="og:title" content="NFT Snapshots • Ronin" />
+  <meta property="og:description" content="Take and export NFT holder snapshots on Ronin. Explorer API / RPC Single / RPC Multicall." />
+  <meta property="og:image" content="https://roninchain.com/android-chrome-512x512.png" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@Ronin_Network" />
+  <meta name="twitter:title" content="NFT Snapshots • Ronin" />
+  <meta name="twitter:description" content="Take and export NFT holder snapshots on Ronin. Explorer API / RPC Single / RPC Multicall." />
+  <meta name="twitter:image" content="https://roninchain.com/android-chrome-512x512.png" />
+
+  <!-- Favicons & App Icons (Ronin logo) -->
+  <link rel="apple-touch-icon" sizes="180x180" href="https://roninchain.com/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="https://roninchain.com/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="https://roninchain.com/favicon-16x16.png" />
+  <link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128"><defs><linearGradient id="g" x1="0" x2="1"><stop stop-color="%233B82F6"/><stop offset="1" stop-color="%2360A5FA"/></linearGradient></defs><rect width="128" height="128" rx="24" fill="url(%23g)"/><text x="50%" y="58%" text-anchor="middle" font-family="Inter,Arial" font-size="72" font-weight="700" fill="#061227">R</text></svg>' />
+  <link rel="manifest" href="/site.webmanifest" crossorigin="use-credentials" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg: #0A0D12; --panel: rgba(17, 22, 30, 0.5); --panel-2: rgba(12, 17, 24, 0.55);
+      --stroke: rgba(115, 155, 255, .18); --ink: #EAF1FF; --muted: #99A7C3; --mono: #8AA4FF;
+      --blue: #3B82F6; --blue2:#60A5FA; --good:#34D399; --bad:#FF6B6B;
+      --radius: 18px; --shadow: 0 18px 60px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; color:var(--ink); font-family:'Inter',system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+      background:
+        radial-gradient(900px 600px at 15% 10%, rgba(59,130,246,0.18), transparent),
+        radial-gradient(900px 600px at 85% 25%, rgba(138,180,255,0.15), transparent),
+        linear-gradient(180deg, #070A10, var(--bg));
+    }
+    .wrap{max-width:1100px;margin:36px auto;padding:0 18px}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px}
+    .logo{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:-.02em}
+    .mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),var(--blue2));display:grid;place-items:center;color:#061227}
+    .guide{color:var(--mono);text-decoration:none;font-weight:600}
+
+    .hero{display:flex;flex-direction:column;align-items:center;text-align:center;margin:24px 0 10px}
+    .hero h1{margin:6px 0 8px;font-size:36px;letter-spacing:-.03em}
+    .hero p{margin:0;color:var(--muted)}
+
+    .panel{margin:22px auto 0; padding:18px; background:var(--panel); border:1px solid var(--stroke); border-radius:var(--radius); box-shadow:var(--shadow); backdrop-filter: blur(16px) saturate(120%);}    
+    .controls{display:grid;grid-template-columns:160px 1fr 160px 160px;gap:10px}
+    @media (max-width:940px){.controls{grid-template-columns:1fr}}
+
+    label{display:block;font-size:12px;color:var(--muted);margin:4px 0}
+    input,select{width:100%;background:var(--panel-2);border:1px solid #22324a;color:var(--ink);padding:12px;border-radius:12px;outline:none;transition:border .2s, box-shadow .2s}
+    input:focus,select:focus{border-color:#2b3b56;box-shadow:0 0 0 4px rgba(59,130,246,.17)}
+
+    .btn{appearance:none;border:0;border-radius:12px;padding:12px 16px;font-weight:700;cursor:pointer;color:#061227;background:linear-gradient(135deg,var(--blue),var(--blue2));box-shadow:0 10px 26px rgba(59,130,246,.28);transition:transform .06s}
+    .btn:hover{transform:translateY(-1px)} .btn:disabled{opacity:.6;cursor:not-allowed}
+
+    .progress{height:12px;border:1px solid #1E2B40;border-radius:999px;background:rgba(9,15,23,.55);overflow:hidden;margin:14px 0}
+    .bar{height:100%;width:0%;background:linear-gradient(90deg,var(--blue),var(--mono))}
+    .status{min-height:20px;color:var(--muted);font-size:13px;text-align:left}
+
+    .pill{display:inline-flex;align-items:center;gap:6px;background:rgba(14,23,36,.6);border:1px solid #1E2B40;color:var(--muted);font-size:12px;border-radius:999px;padding:6px 10px}
+    .ok{color:var(--good)} .bad{color:var(--bad)}
+
+    .results{margin-top:16px;background:var(--panel-2);border:1px solid var(--stroke);border-radius:16px;overflow:hidden;backdrop-filter: blur(10px)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:12px 14px;border-bottom:1px solid #152032;font-size:13px}
+    thead th{background:rgba(10,16,24,.66);color:var(--muted);text-align:left;position:sticky;top:0}
+
+    .features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:28px 0}
+    @media (max-width:920px){.features{grid-template-columns:1fr}} .tile{background:var(--panel);border:1px solid var(--stroke);border-radius:14px;padding:16px;backdrop-filter: blur(10px)} .tile b{display:block;margin-bottom:6px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div class="logo"><div class="mark">R</div> NFT Snapshots</div>
+      <a class="guide" href="#" onclick="alert('Guide coming soon')">Watch guide</a>
+    </div>
+
+    <div class="hero">
+      <h1>NFT Snapshots</h1>
+      <p>Take and export NFT holder snapshots on <b>Ronin</b> (chainId 2020). Explorer API / RPC Single / RPC Multicall.</p>
+    </div>
+
+    <div class="panel">
+      <div class="controls">
+        <div>
+          <label>Engine</label>
+          <select id="engine">
+            <option value="explorer" selected>Explorer API (fast)</option>
+            <option value="single">RPC Single</option>
+            <option value="multicall">RPC Multicall</option>
+          </select>
+        </div>
+        <div>
+          <label>Collection (ERC721)</label>
+          <input id="address" placeholder="0x…" />
+        </div>
+        <div>
+          <label>Block</label>
+          <input id="block" placeholder="latest" />
+        </div>
+        <div>
+          <label>&nbsp;</label>
+          <button id="go" class="btn" style="width:100%">Take snapshot</button>
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:10px">
+        <div>
+          <label>RPCs (comma separated)</label>
+          <input id="rpcs" value="https://api.roninchain.com/rpc" />
+        </div>
+        <div>
+          <label>From ID</label>
+          <input id="from" type="number" min="0" value="1" />
+        </div>
+        <div>
+          <label>To ID (blank = auto)</label>
+          <input id="to" type="number" min="0" placeholder="AUTO" />
+        </div>
+        <div>
+          <label>Calls / sec</label>
+          <input id="rps" value="12" />
+        </div>
+        <div>
+          <label>Parallel</label>
+          <input id="parallel" value="2" />
+        </div>
+      </div>
+
+      <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+        <div>
+          <label>Multicall Address (optional)</label>
+          <input id="multicall" placeholder="0x… (tryAggregate/aggregate)" />
+        </div>
+        <div>
+          <label>MC Chunk Size</label>
+          <input id="mcChunk" value="100" />
+        </div>
+        <div>
+          <label>Explorer Page Size</label>
+          <input id="pageSize" value="200" />
+        </div>
+      </div>
+
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap">
+        <span class="pill">Enumerable: <span id="enumFlag" class="bad">unknown</span></span>
+        <button id="download" class="btn" disabled>Download Excel</button>
+      </div>
+
+      <div class="progress"><div id="bar" class="bar"></div></div>
+      <div id="status" class="status">Idle.</div>
+
+      <div id="results" class="results" style="display:none;">
+        <table>
+          <thead>
+            <tr><th style="width:72px;">S.No</th><th>Address</th><th style="width:140px;">NFTs held</th></tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="features">
+      <div class="tile"><b>Take a snapshot</b><span>Explorer API pagination or on-chain via single calls / multicall.</span></div>
+      <div class="tile"><b>Export wallets</b><span>Download an Excel with <i>S.No</i>, <i>address</i>, <i>NFTs held</i>.</span></div>
+      <div class="tile"><b>Stay reliable</b><span>Rotate RPCs, backoff on 429, and rate‑limit calls per second to avoid overload.</span></div>
+    </div>
+  </div>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script>
+    const CHAIN_ID_HEX = '0x7E4'; // 2020
+    const EXPLORER_BASE = 'https://skynet-api.roninchain.com/ronin/explorer/v2/tokens/';
+
+    const $ = (id) => document.getElementById(id);
+    const statusEl = $('status'), barEl = $('bar'), tbody = $('tbody'), resultsBox = $('results'), enumFlag = $('enumFlag'), downloadBtn = $('download');
+
+    function setStatus(msg){ statusEl.textContent = msg; }
+    function setProgress(done, total){ const p = total ? Math.round(100 * done / total) : 0; barEl.style.width = p + '%'; }
+    function isAddress(addr){ try{ ethers.utils.getAddress(addr); return true; } catch { return false; } }
+
+    function parseRPS(){ const raw = Number($('rps').value || 12); return Math.max(1, Math.min(20, raw)); }
+    function parseParallel(){ const raw = Number($('parallel').value || 2); return Math.max(1, Math.min(4, raw)); }
+
+    class RPCPool{ constructor(urls){ this.nodes = urls.map(u=>({ url:u, cooldownUntil:0, backoff:300 })); this.i = 0; }
+      pick(){ const now=Date.now(); for(let j=0;j<this.nodes.length;j++){ const idx=(this.i+j)%this.nodes.length; if(this.nodes[idx].cooldownUntil<=now){ this.i=(idx+1)%this.nodes.length; return this.nodes[idx]; } } return this.nodes.reduce((a,b)=> a.cooldownUntil<b.cooldownUntil?a:b); }
+      async requestCall(to, data, blockTag='latest'){ const node=this.pick(); const body={jsonrpc:'2.0', id:1, method:'eth_call', params:[{to, data}, blockTag]}; const res=await fetch(node.url,{method:'POST', headers:{'content-type':'application/json'}, body:JSON.stringify(body)}); if([400,429,503].includes(res.status)){ node.cooldownUntil=Date.now()+node.backoff; node.backoff=Math.min(node.backoff*2,6000); throw new Error('rpc-overload'); } const json=await res.json(); if(json.error){ node.cooldownUntil=Date.now()+Math.min(2000,node.backoff); throw new Error('rpc-error:'+ (json.error.message||'unknown')); } node.backoff=Math.max(200,Math.floor(node.backoff*0.6)); return json.result; } }
+
+    class RateLimiter{ constructor(rps){ this.interval=Math.max(40, Math.floor(1000/Math.max(1,rps))); this.nextAt=0; } async wait(){ const now=Date.now(); const waitMs=Math.max(0,this.nextAt-now); if(waitMs>0) await new Promise(r=>setTimeout(r,waitMs)); this.nextAt=Math.max(now,this.nextAt)+this.interval; } }
+
+    async function chainSanity(rpc){ try{ const res=await fetch(rpc,{method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({jsonrpc:'2.0', id:1, method:'eth_chainId', params:[]})}); const j=await res.json(); if(j && j.result && j.result !== CHAIN_ID_HEX){ setStatus(`Warning: chainId ${parseInt(j.result,16)} (expected 2020)`); } }catch{} }
+
+    function renderTable(rows){ tbody.innerHTML=''; rows.forEach((r,i)=>{ const tr=document.createElement('tr'); tr.innerHTML=`<td>${i+1}</td><td>${r.address}</td><td>${r.count}</td>`; tbody.appendChild(tr); }); resultsBox.style.display=rows.length?'block':'none'; }
+    function downloadExcel(rows){ const ordered=rows.map((r,i)=>({'S.No':i+1,'address':r.address,'nfts held':r.count})); const ws=XLSX.utils.json_to_sheet(ordered,{header:['S.No','address','nfts held']}); ws['!cols']=[{wch:6},{wch:44},{wch:10}]; const wb=XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb,ws,'holders'); XLSX.writeFile(wb,'ronin_snapshot.xlsx'); }
+
+    // ---------- Explorer API path ----------
+    // Simple GET with retry/backoff for Explorer
+    async function fetchJSONWithRetry(url, { retries = 4, baseDelay = 400 } = {}){
+      let attempt = 0;
+      while(true){
+        try{
+          const res = await fetch(url, { method: 'GET', headers: { 'accept': 'application/json' } });
+          // Handle 429/503 with backoff
+          if(res.status === 429 || res.status === 503){
+            if(attempt >= retries) throw new Error(`Explorer HTTP ${res.status}`);
+            const wait = Math.min(4000, baseDelay * Math.pow(2, attempt));
+            await new Promise(r=>setTimeout(r, wait));
+            attempt++;
+            continue;
+          }
+          if(!res.ok){
+            throw new Error(`Explorer HTTP ${res.status}`);
+          }
+          return await res.json();
+        }catch(e){
+          if(attempt >= retries){ throw e; }
+          const wait = Math.min(4000, baseDelay * Math.pow(2, attempt));
+          await new Promise(r=>setTimeout(r, wait));
+          attempt++;
+        }
+      }
+    }
+
+    async function fetchTopHoldersExplorer(contract, pageSize){
+      const holders = [];
+      const merged = new Map();
+      let offset = 0;
+      const limit = Math.max(1, Math.min(200, Number(pageSize) || 200));
+      let page = 0;
+
+      while(true){
+        page++;
+        const url = `${EXPLORER_BASE}${contract}/top_holders?limit=${limit}&offset=${offset}`;
+        const j = await fetchJSONWithRetry(url);
+
+        // The Skynet Explorer returns: { result: { items: [ { ownerAddress, balance, ... }, ... ] } }
+        const arr = j?.result?.items || j?.items || j?.data || [];
+        if(!Array.isArray(arr) || arr.length === 0){
+          break;
+        }
+
+        // Normalize and merge by address
+        for(const it of arr){
+          const addr = (it.ownerAddress || it.address || it.holder || it.owner || it.wallet || it.account || it.holderAddress || "").toString().toLowerCase();
+          const balRaw = it.balance ?? it.amount ?? it.value ?? it.holding ?? it.count ?? it.quantity ?? 0;
+          const bal = Number(balRaw);
+          if(addr){
+            merged.set(addr, (merged.get(addr) || 0) + (Number.isFinite(bal) ? bal : 1));
+          }
+        }
+
+        offset += arr.length; // advance by actual returned size to be safe
+        setStatus(`Explorer page ${page} • loaded ${offset} rows`);
+        setProgress(offset, offset + limit); // pseudo-progress
+
+        // Stop when the page is short (last page) or fewer than requested
+        if(arr.length < limit){
+          break;
+        }
+      }
+
+      // Build sorted array
+      for(const [address, count] of merged.entries()){
+        holders.push({ address, count });
+      }
+      holders.sort((a,b)=> b.count - a.count);
+      return holders;
+    }
+
+    // ---------- Multicall helpers ----------
+    const IFACE_ERC721 = new ethers.utils.Interface([
+      'function totalSupply() view returns (uint256)',
+      'function tokenByIndex(uint256) view returns (uint256)',
+      'function ownerOf(uint256) view returns (address)'
+    ]);
+    const IFACE_MC_AGG = new ethers.utils.Interface([
+      'function aggregate(tuple(address target, bytes callData)[] calls) public returns (uint256 blockNumber, bytes[] returnData)'
+    ]);
+    const IFACE_MC_TRY = new ethers.utils.Interface([
+      'function tryAggregate(bool requireSuccess, tuple(address target, bytes callData)[] calls) public returns (tuple(bool success, bytes returnData)[])'
+    ]);
+
+    async function multicallAggregate(provider, mc, calls){
+      // Try Multicall2/3: aggregate first, then tryAggregate(requireSuccess=false)
+      const dataAgg = IFACE_MC_AGG.encodeFunctionData('aggregate',[calls]);
+      try{
+        const r = await provider.call({ to: mc, data: dataAgg });
+        const [blockNumber, returnData] = IFACE_MC_AGG.decodeFunctionResult('aggregate', r);
+        return returnData.map((ret)=>({ success: true, returnData: ret }));
+      }catch{}
+      const dataTry = IFACE_MC_TRY.encodeFunctionData('tryAggregate',[false, calls]);
+      const r2 = await provider.call({ to: mc, data: dataTry });
+      const decoded = IFACE_MC_TRY.decodeFunctionResult('tryAggregate', r2);
+      return decoded.map(([success, returnData])=>({ success, returnData }));
+    }
+
+    async function getTotalSupply(provider, address){ try{ const r = await provider.call({ to: address, data: IFACE_ERC721.encodeFunctionData('totalSupply', [])}); const [s]=IFACE_ERC721.decodeFunctionResult('totalSupply', r); return s.toNumber? s.toNumber(): Number(s); }catch{ return null; } }
+    async function detectEnumerable(provider, address){ try{ await provider.call({ to: address, data: IFACE_ERC721.encodeFunctionData('tokenByIndex', [0])}); return true; }catch{ return false; } }
+
+    async function tokenIdsViaMulticall(provider, mcAddr, address, total, chunkSize){
+      const ids = new Array(total);
+      let done = 0;
+      for(let i=0;i<total;i+=chunkSize){
+        const end = Math.min(total, i+chunkSize);
+        const calls = [];
+        for(let j=i;j<end;j++) calls.push({ target: address, callData: IFACE_ERC721.encodeFunctionData('tokenByIndex',[j]) });
+        const out = await multicallAggregate(provider, mcAddr, calls);
+        for(let k=0;k<out.length;k++){
+          if(out[k].success){
+            try{
+              const [tid] = IFACE_ERC721.decodeFunctionResult('tokenByIndex', out[k].returnData);
+              ids[i+k] = tid.toNumber? tid.toNumber(): Number(tid);
+            }catch{}
+          }
+        }
+        done += (end - i);
+        setProgress(done, total); setStatus(`tokenByIndex ${done}/${total}`);
+      }
+      return ids.filter(n=>typeof n==='number');
+    }
+
+    async function ownerOfViaMulticall(provider, mcAddr, address, tokenIds, chunkSize){
+      const out = new Array(tokenIds.length);
+      let done = 0;
+      for(let i=0;i<tokenIds.length;i+=chunkSize){
+        const end = Math.min(tokenIds.length, i+chunkSize);
+        const calls = [];
+        for(let j=i;j<end;j++) calls.push({ target: address, callData: IFACE_ERC721.encodeFunctionData('ownerOf',[tokenIds[j]]) });
+        const res = await multicallAggregate(provider, mcAddr, calls);
+        for(let k=0;k<res.length;k++){
+          if(res[k].success){
+            try{
+              const [owner] = IFACE_ERC721.decodeFunctionResult('ownerOf', res[k].returnData);
+              out[i+k] = { tokenId: tokenIds[i+k], owner: owner.toLowerCase() };
+            }catch{}
+          }
+        }
+        done += (end - i);
+        setProgress(done, tokenIds.length); setStatus(`ownerOf ${done}/${tokenIds.length}`);
+      }
+      return out.filter(Boolean);
+    }
+
+    // ---------- RPC single (rate-limited) path with worker queue ----------
+    async function runQueue({ total, concurrency, worker }){
+      let next=0, done=0; const results=new Array(total);
+      async function one(){ while(true){ const i=next++; if(i>=total) break; try{ results[i]=await worker(i); }catch{} done++; setProgress(done,total);} }
+      await Promise.all(Array.from({length:Math.min(concurrency,total)}, one));
+      return results;
+    }
+
+    async function tokenIdsEnumerableSingle(pool, address, total, limiter, concurrency){
+      const out = await runQueue({ total, concurrency, worker: async (i)=>{ await limiter.wait(); try{ const res= await pool.requestCall(address, IFACE_ERC721.encodeFunctionData('tokenByIndex',[i])); const [tid]=IFACE_ERC721.decodeFunctionResult('tokenByIndex', res); return tid.toNumber?tid.toNumber():Number(tid);}catch{} return undefined; } });
+      return out.filter(n=>typeof n==='number');
+    }
+    async function ownerOfSingle(pool, address, tokenIds, limiter, concurrency){
+      const total = tokenIds.length;
+      const out = await runQueue({ total, concurrency, worker: async (i)=>{ await limiter.wait(); try{ const res= await pool.requestCall(address, IFACE_ERC721.encodeFunctionData('ownerOf',[tokenIds[i]])); const [owner]=IFACE_ERC721.decodeFunctionResult('ownerOf', res); return { tokenId: tokenIds[i], owner: owner.toLowerCase() }; }catch{} return undefined; } });
+      return out.filter(Boolean);
+    }
+
+    // ---------- Main ----------
+    async function snapshot(){
+      const engine = $('engine').value;
+      const address = $('address').value.trim();
+      const rpcs = $('rpcs').value.split(',').map(s=>s.trim()).filter(Boolean);
+      const provider = new ethers.providers.JsonRpcProvider(rpcs[0]);
+      let fromVal = Number($('from').value||1); const toValRaw = $('to').value.trim();
+      const rps = parseRPS(); const parallel = parseParallel(); const limiter = new RateLimiter(rps);
+      const mcAddr = $('multicall').value.trim(); const mcChunk = Math.max(10, Math.min(300, Number($('mcChunk').value||100)));
+      const pageSize = Math.max(1, Math.min(200, Number($('pageSize').value||200)));
+
+      if(!isAddress(address)){ alert('Please provide a valid contract address'); return; }
+      $('go').disabled=true; downloadBtn.disabled=true; setProgress(0,1); setStatus('Initializing…');
+
+      if(engine === 'explorer'){
+        try{
+          const holders = await fetchTopHoldersExplorer(address, pageSize);
+          renderTable(holders);
+          setStatus(`Explorer holders: ${holders.length}`);
+          downloadBtn.disabled = holders.length===0; downloadBtn.onclick=()=>downloadExcel(holders);
+        }catch(e){ setStatus('Explorer error: '+ e.message); }
+        $('go').disabled=false; return;
+      }
+
+      if(!rpcs.length){ alert('Please provide at least one RPC URL'); $('go').disabled=false; return; }
+      await chainSanity(rpcs[0]);
+
+      // Common: detect totalSupply & enumerable
+      let totalSupply = await getTotalSupply(provider, address);
+      setStatus(totalSupply==null ? 'totalSupply() unavailable. Provide a token ID range.' : `totalSupply: ${totalSupply}`);
+      const enumerable = await detectEnumerable(provider, address);
+      enumFlag.textContent = enumerable ? 'yes' : 'no'; enumFlag.className = enumerable ? 'ok' : 'bad';
+
+      // Token IDs
+      let tokenIds = [];
+      if(toValRaw !== ''){
+        let toVal = Number(toValRaw); if(!Number.isFinite(toVal)){ $('go').disabled=false; setStatus('Invalid "To ID" value.'); return; }
+        if(toVal < fromVal){ const tmp=toVal; toVal=fromVal; fromVal=tmp; }
+        for(let t=fromVal; t<=toVal; t++) tokenIds.push(t);
+        setStatus(`Using manual range: ${fromVal} → ${toVal} (${tokenIds.length} tokens)`);
+      } else if(engine==='multicall' && enumerable && totalSupply!=null && mcAddr){
+        setStatus('Collecting token IDs via Multicall…');
+        tokenIds = await tokenIdsViaMulticall(provider, mcAddr, address, totalSupply, mcChunk);
+      } else if(enumerable && totalSupply!=null){
+        setStatus('Collecting token IDs via tokenByIndex (rate-limited)…');
+        const pool = new RPCPool(rpcs); tokenIds = await tokenIdsEnumerableSingle(pool, address, totalSupply, limiter, parallel);
+      } else {
+        const toVal = (totalSupply!=null ? (fromVal + totalSupply - 1) : NaN); if(!Number.isFinite(toVal)){ $('go').disabled=false; setStatus('Cannot determine token range. Provide To Token ID.'); return; }
+        for(let t=fromVal; t<=toVal; t++) tokenIds.push(t);
+        setStatus(`Using derived range from totalSupply: ${fromVal} → ${toVal} (${tokenIds.length} tokens)`);
+      }
+
+      // Owners
+      setStatus(`Fetching owners for ${tokenIds.length} tokens…`); setProgress(0,1);
+      let ownerships = [];
+      if(engine==='multicall' && mcAddr){
+        ownerships = await ownerOfViaMulticall(provider, mcAddr, address, tokenIds, mcChunk);
+      } else {
+        const pool = new RPCPool(rpcs); ownerships = await ownerOfSingle(pool, address, tokenIds, limiter, parallel);
+      }
+
+      const holders = (function(){ const m=new Map(); for(const {owner} of ownerships){ m.set(owner,(m.get(owner)||0)+1);} return Array.from(m.entries()).map(([address,count])=>({address,count})).sort((a,b)=>b.count-a.count); })();
+      renderTable(holders);
+      if(holders.length===0){ setStatus('Finished. No holders found for the selected range.'); } else { setStatus('Done. You can download the Excel now.'); }
+      downloadBtn.disabled = holders.length===0; downloadBtn.onclick=()=>downloadExcel(holders);
+      $('go').disabled=false;
+    }
+
+    $('go').addEventListener('click', snapshot);
+  </script>
+</div>
+    <div style="text-align:center; margin-top:20px; font-size:13px; color:var(--muted);">
+      Made with ❤️ by <a href="https://x.com/PhatmoSolana" target="_blank" style="color:var(--mono);text-decoration:none;">Phantom Dev</a>
+    </div>
+</body>
+</html>
